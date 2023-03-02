@@ -1,5 +1,6 @@
 const { Client } = require("pg");
 const client = new Client("postgres://localhost:5432/juicebox-dev");
+
 //returns all users from database
 async function getAllUsers() {
   const { rows } = await client.query(
@@ -57,6 +58,29 @@ async function updateUser(id, fields = {}) {
     throw error;
   }
 }
+//return the user from their id except password
+async function getUserById(userId) {
+  try {
+    const {
+      rows: [user],
+    } = await client.query(`
+        SELECT * FROM users
+        WHERE "id"=${userId};
+      `);
+    if (!user) {
+      return null;
+    }
+    delete user.password;
+
+    myPosts = await getPostsByUser(userId);
+    user.posts = myPosts;
+
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
+
 //create post and return the new post
 async function createPost({
   authorId,
@@ -157,28 +181,57 @@ async function getPostsByUser(userId) {
     throw error;
   }
 }
-//return the user from their id except password
-async function getUserById(userId) {
+//returns a post and its tags
+async function getPostById(postId) {
   try {
-    const {
-      rows: [user],
-    } = await client.query(`
-        SELECT * FROM users
-        WHERE "id"=${userId};
-      `);
-    if (!user) {
-      return null;
-    }
-    delete user.password;
+    const { rows: [ post ]  } = await client.query(`
+      SELECT *
+      FROM posts
+      WHERE id=$1;
+    `, [postId]);
 
-    myPosts = await getPostsByUser(userId);
-    user.posts = myPosts;
+    const { rows: tags } = await client.query(`
+      SELECT tags.*
+      FROM tags
+      JOIN post_tags ON tags.id=post_tags."tagId"
+      WHERE post_tags."postId"=$1;
+    `, [postId])
 
-    return user;
+    const { rows: [author] } = await client.query(`
+      SELECT id, username, name, location
+      FROM users
+      WHERE id=$1;
+    `, [post.authorId])
+
+    post.tags = tags;
+    post.author = author;
+
+    delete post.authorId;
+    console.log("test", post)
+    return post;
   } catch (error) {
     throw error;
   }
 }
+//returns all posts associated with a tag
+async function getPostsByTagName(tagName) {
+  try {
+    const { rows: postIds } = await client.query(`
+      SELECT posts.id FROM posts
+      JOIN post_tags ON posts.id=post_tags."postId"
+      JOIN tags ON tags.id=post_tags."tagId"
+      WHERE tags.name=$1;
+    `, [tagName]);
+
+    return await Promise.all(postIds.map(
+      post => getPostById(post.id)
+    ));
+  } catch (error) {
+    throw error;
+  }
+} 
+
+
 //creates tags and returns an array of the new tags
 async function createTags(tagList) {
   if (tagList.length === 0) {
@@ -237,55 +290,6 @@ async function addTagsToPost(postId, tagList) {
     throw error;
   }
 }
-//returns a post and its tags
-async function getPostById(postId) {
-  try {
-    const { rows: [ post ]  } = await client.query(`
-      SELECT *
-      FROM posts
-      WHERE id=$1;
-    `, [postId]);
-
-    const { rows: tags } = await client.query(`
-      SELECT tags.*
-      FROM tags
-      JOIN post_tags ON tags.id=post_tags."tagId"
-      WHERE post_tags."postId"=$1;
-    `, [postId])
-
-    const { rows: [author] } = await client.query(`
-      SELECT id, username, name, location
-      FROM users
-      WHERE id=$1;
-    `, [post.authorId])
-
-    post.tags = tags;
-    post.author = author;
-
-    delete post.authorId;
-    console.log("test", post)
-    return post;
-  } catch (error) {
-    throw error;
-  }
-}
-//returns all posts associated with a tag
-async function getPostsByTagName(tagName) {
-  try {
-    const { rows: postIds } = await client.query(`
-      SELECT posts.id FROM posts
-      JOIN post_tags ON posts.id=post_tags."postId"
-      JOIN tags ON tags.id=post_tags."tagId"
-      WHERE tags.name=$1;
-    `, [tagName]);
-
-    return await Promise.all(postIds.map(
-      post => getPostById(post.id)
-    ));
-  } catch (error) {
-    throw error;
-  }
-} 
 
 module.exports = {
   client,
