@@ -1,6 +1,6 @@
 const { Client } = require("pg");
 const client = new Client("postgres://localhost:5432/juicebox-dev");
-
+//returns all users from database
 async function getAllUsers() {
   const { rows } = await client.query(
     `SELECT id, username, name, location, active
@@ -10,7 +10,7 @@ async function getAllUsers() {
 
   return rows;
 }
-
+//create user and returns the user except password
 async function createUser({ username, password, name, location }) {
   try {
     const {
@@ -23,13 +23,13 @@ async function createUser({ username, password, name, location }) {
     `,
       [username, password, name, location]
     );
-
+      delete (user.password)
     return user;
   } catch (error) {
     throw error;
   }
 }
-
+//changes fields in users database and returns the new user except the password
 async function updateUser(id, fields = {}) {
   const setString = Object.keys(fields)
     .map((key, index) => `"${key}"=$${index + 1}`)
@@ -51,13 +51,13 @@ async function updateUser(id, fields = {}) {
       `,
       Object.values(fields)
     );
-
+      delete(user.password)
     return user;
   } catch (error) {
     throw error;
   }
 }
-
+//create post and return the new post
 async function createPost({
   authorId,
   title,
@@ -78,7 +78,7 @@ async function createPost({
     throw error;
   }
 }
-
+//updates post and returns the new post
 async function updatePost(id, fields = {}) {
   const { tags } = fields;
   delete fields.tags;
@@ -122,7 +122,7 @@ return await getPostById(id);
 throw error;
 }
 }
-
+//return all posts from database
 async function getAllPosts() {
   try {
     const { rows: postIds } = await client.query(`
@@ -139,7 +139,7 @@ async function getAllPosts() {
     throw error;
   }
 }
-
+//return all post associated with a user id
 async function getPostsByUser(userId) {
   try {
     const { rows: postIds } = await client.query(`
@@ -157,7 +157,7 @@ async function getPostsByUser(userId) {
     throw error;
   }
 }
-
+//return the user from their id except password
 async function getUserById(userId) {
   try {
     const {
@@ -179,7 +179,7 @@ async function getUserById(userId) {
     throw error;
   }
 }
-
+//creates tags and returns an array of the new tags
 async function createTags(tagList) {
   if (tagList.length === 0) {
     return;
@@ -211,7 +211,7 @@ async function createTags(tagList) {
     throw error;
   }
 }
-
+//creates a post tag to join posts and their tags
 async function createPostTag(postId, tagId) {
 
   try {
@@ -223,7 +223,7 @@ async function createPostTag(postId, tagId) {
     throw error;
   }
 }
-
+//calls create posttag for every tag with the post id and returns the post with its tags
 async function addTagsToPost(postId, tagList) {
 
   try {
@@ -237,7 +237,7 @@ async function addTagsToPost(postId, tagList) {
     throw error;
   }
 }
-
+//returns a post and its tags
 async function getPostById(postId) {
   try {
     const { rows: [ post ]  } = await client.query(`
@@ -263,13 +263,13 @@ async function getPostById(postId) {
     post.author = author;
 
     delete post.authorId;
-
+    console.log("test", post)
     return post;
   } catch (error) {
     throw error;
   }
 }
-
+//returns all posts associated with a tag
 async function getPostsByTagName(tagName) {
   try {
     const { rows: postIds } = await client.query(`
