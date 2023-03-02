@@ -9,7 +9,6 @@ const {
   getPostsByUser,
   getUserById,
   addTagsToPost,
-  createTags,
   get
 } = require("./index");
 
@@ -87,7 +86,6 @@ async function rebuildDB() {
     await createTables();
     await createInitialUsers();
     await createInitialPosts();
-    await createInitialTags();
   } catch (error) {
     throw error;
   }
@@ -122,6 +120,12 @@ async function testDB() {
     const getUserByIdResult = await getUserById(users[0].id)
     console.log("result:",getUserByIdResult )
 
+    console.log("Calling updatePost on posts[1], only updating tags");
+    const updatePostTagsResult = await updatePost(posts[1].id, {
+      tags: ["#youcandoanything", "#redfish", "#bluefish"]
+    });
+    console.log("Result:", updatePostTagsResult);
+
 
     console.log("Finished database tests!");
   } catch (error) {
@@ -129,6 +133,7 @@ async function testDB() {
     throw error;
   }
 }
+
 
 async function createInitialUsers() {
   try {
@@ -174,27 +179,32 @@ async function createInitialPosts() {
       title: "First Post",
       content:
         "This is my first post. I hope I love writing blogs as much as I love writing them.",
+        tags:["word","letters","writing"]
     });
     await createPost({
       authorId: glamgal.id,
       title: "my first Post",
       content: "Ti'm so glam its awesome.",
+      tags:["word","letters","writing"]
     });
     await createPost({
       authorId: sandra.id,
       title: "only post",
       content: "i don't like to make posts",
+      tags:["word","letters","writing"]
     });
     await createPost({
       authorId: albert.id,
       title: "second Post",
       content:
         "This is my second post. I hope I love writing blogs as much as I love writing them.",
+        tags:["word","letters","writing"]
     });
     await createPost({
       authorId: glamgal.id,
       title: "another Post",
       content: "I hope I love writing blogs as much as I love writing them.",
+      tags:["word","letters","writing"]
     });
     console.log("Finished creating posts!");
   } catch (error) {
@@ -203,33 +213,7 @@ async function createInitialPosts() {
   }
 }
 
-async function createInitialTags() {
-  try {
-    console.log("Starting to create tags...");
 
-    const [happy, sad, inspo, catman] = await createTags([
-      '#happy', 
-      '#worst-day-ever', 
-      '#youcandoanything',
-      '#catmandoeverything'
-    ]);
-
-    const [postOne, postTwo, postThree] = await getAllPosts();
-    const postOneTags = await addTagsToPost(postOne.id, [happy, inspo]);
-    const postTwoTags =  await addTagsToPost(postTwo.id, [sad, inspo]);
-    const postThreeTags =  await addTagsToPost(postThree.id, [happy, catman, inspo]);
-
-    console.log(postOneTags)
-    console.log(postTwoTags)
-    console.log(postThreeTags)
-
-
-    console.log("Finished creating tags!");
-  } catch (error) {
-    console.log("Error creating tags!");
-    throw error;
-  }
-}
 
 
 
