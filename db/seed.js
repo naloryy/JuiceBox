@@ -9,7 +9,8 @@ const {
   getPostsByUser,
   getUserById,
   addTagsToPost,
-  createTags
+  createTags,
+  get
 } = require("./index");
 
 async function dropTables() {
@@ -214,9 +215,14 @@ async function createInitialTags() {
     ]);
 
     const [postOne, postTwo, postThree] = await getAllPosts();
-    await addTagsToPost(postOne.id, [happy, inspo]);
-    await addTagsToPost(postTwo.id, [sad, inspo]);
-    await addTagsToPost(postThree.id, [happy, catman, inspo]);
+    const postOneTags = await addTagsToPost(postOne.id, [happy, inspo]);
+    const postTwoTags =  await addTagsToPost(postTwo.id, [sad, inspo]);
+    const postThreeTags =  await addTagsToPost(postThree.id, [happy, catman, inspo]);
+
+    console.log(postOneTags)
+    console.log(postTwoTags)
+    console.log(postThreeTags)
+
 
     console.log("Finished creating tags!");
   } catch (error) {
