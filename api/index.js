@@ -21,7 +21,6 @@ apiRouter.use(async (req, res, next) => {
     next();
   } else if (auth.startsWith(prefix)) {
     const token = auth.slice(prefix.length);
-
     try {
       const { id } = jwt.verify(token, JWT_SECRET);
 
@@ -39,20 +38,6 @@ apiRouter.use(async (req, res, next) => {
     });
   }
 });
-
-async function getUserByUsername(username) {
-    try {
-      const { rows: [user] } = await client.query(`
-        SELECT *
-        FROM users
-        WHERE username=$1;
-      `, [username]);
-  
-      return user;
-    } catch (error) {
-      throw error;
-    }
-  }
 
   apiRouter.use((req, res, next) => {
     if (req.user) {
