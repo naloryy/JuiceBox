@@ -140,7 +140,6 @@ async function testDB() {
   }
 }
 
-
 async function createInitialUsers() {
   try {
     console.log("Starting to create users...");
