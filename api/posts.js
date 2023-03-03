@@ -14,18 +14,7 @@ postsRouter.get('/', async (req, res, next) => {
     const allPosts = await getAllPosts();
 
     const posts = allPosts.filter(post => {
-      // the post is active, doesn't matter who it belongs to
-      if (post.active) {
-        return true;
-      }
-    
-      // the post is not active, but it belogs to the current user
-      if (req.user && post.author.id === req.user.id) {
-        return true;
-      }
-    
-      // none of the above are true
-      return false;
+      return post.active || (req.user && post.author.id === req.user.id);
     });
 
     res.send({
