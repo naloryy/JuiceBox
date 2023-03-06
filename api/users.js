@@ -98,6 +98,31 @@ usersRouter.get("/", async (req, res) => {
   });
 });
 
+usersRouter.delete('/:userId', requireUser, async (req, res, next) => {
+  try {
+
+    const user = await getUserById(req.params.userId);
+    if (user && user.id === req.user.id) {
+      console.log('test')
+      const updatedUser = await updateUser(user.id, { active: false });
+      console.log(updatedUser)
+      res.send({ user: updatedUser });
+    } else {
+      // if there was a user, throw UnauthorizedUserError, otherwise throw UserNotFoundError
+      next(post ? { 
+        name: "UnauthorizedUserError",
+        message: "You cannot delete a user which is not you"
+      } : {
+        name: "UserNotFoundError",
+        message: "That user does not exist"
+      });
+    }
+
+  } catch ({ name, message }) {
+    next({ name, message })
+  }
+});
+
 usersRouter.patch('/:userId', requireUser, async (req, res, next) => {
   const { userId } = req.params;
   const { username, password, name, location, active } = req.body;
