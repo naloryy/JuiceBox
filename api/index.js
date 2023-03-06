@@ -15,7 +15,6 @@ const { JWT_SECRET } = process.env;
 apiRouter.use(async (req, res, next) => {
   const prefix = "Bearer ";
   const auth = req.header("Authorization");
-  console.log("test",req.header)
   if (!auth) {
     // nothing to see here
     next();

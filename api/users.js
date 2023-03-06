@@ -1,7 +1,8 @@
 const express = require("express");
 const usersRouter = express.Router();
 const jwt = require("jsonwebtoken");
-const { getAllUsers, getUserByUsername, createUser } = require("../db");
+const { requireUser } = require("./utils");
+const { getAllUsers, getUserByUsername, createUser, getUserById, updateUser } = require("../db");
 usersRouter.use((req, res, next) => {
   console.log("A request is being made to /users");
 
@@ -85,11 +86,54 @@ usersRouter.post("/register", async (req, res, next) => {
 });
 
 usersRouter.get("/", async (req, res) => {
-  const users = await getAllUsers();
+  const allUsers = await getAllUsers();
+
+  const users = allUsers.filter(user => {
+    return user.active;
+  });
+
 
   res.send({
     users,
   });
+});
+
+usersRouter.patch('/:userId', requireUser, async (req, res, next) => {
+  const { userId } = req.params;
+  const { username, password, name, location, active } = req.body;
+
+  const updateFields = {};
+
+  if (username) {
+    updateFields.username = username;
+  }
+  if (password) {
+    updateFields.password = password;
+  }
+  if (name) {
+    updateFields.name = name;
+  }
+  if (location) {
+    updateFields.location = location;
+  }
+  if (active) {
+    updateFields.active = active;
+  }
+  try {
+    const originalUser = await getUserById(userId);
+
+    if (originalUser && originalUser.id === req.user.id) {
+      const updatedUser = await updateUser(userId, updateFields);
+      res.send({ user: updatedUser })
+    } else {
+      next({
+        name: 'UnauthorizedUserError',
+        message: 'You cannot update a user that is not you'
+      })
+    }
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
 });
 
 module.exports = usersRouter;
