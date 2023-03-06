@@ -8,7 +8,7 @@ const {
   getAllPosts,
   getPostsByUser,
   getUserById,
-  getPostsByTagName
+  getPostsByTagName,
 } = require("./index");
 
 async function dropTables() {
@@ -56,7 +56,7 @@ async function createTables() {
         );
       `);
 
-      await client.query(`
+    await client.query(`
       CREATE TABLE tags (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) UNIQUE NOT NULL
@@ -111,17 +111,17 @@ async function testDB() {
 
     console.log("Calling updatePost on posts[0]");
     const updatePostResult = await updatePost(posts[0].id, {
-      title: "new title"
+      title: "new title",
     });
     console.log("Result:", updatePostResult);
 
     console.log("calling getUserById for users[0]");
-    const getUserByIdResult = await getUserById(users[0].id)
-    console.log("result:",getUserByIdResult )
+    const getUserByIdResult = await getUserById(users[0].id);
+    console.log("result:", getUserByIdResult);
 
     console.log("Calling updatePost on posts[1], only updating tags");
     const updatePostTagsResult = await updatePost(posts[1].id, {
-      tags: ["#youcandoanything", "#happy", "#bluefish"]
+      tags: ["#youcandoanything", "#happy", "#bluefish"],
     });
     console.log("Result:", updatePostTagsResult);
 
@@ -184,32 +184,32 @@ async function createInitialPosts() {
       title: "First Post",
       content:
         "This is my first post. I hope I love writing blogs as much as I love writing them.",
-        tags:["#happy","letters","writing"]
+      tags: ["#happy", "letters", "writing"],
     });
     await createPost({
       authorId: glamgal.id,
       title: "my first Post",
       content: "Ti'm so glam its awesome.",
-      tags:["word","letters","writing"]
+      tags: ["word", "letters", "writing"],
     });
     await createPost({
       authorId: sandra.id,
       title: "only post",
       content: "i don't like to make posts",
-      tags:["word","letters","writing"]
+      tags: ["word", "letters", "writing"],
     });
     await createPost({
       authorId: albert.id,
       title: "second Post",
       content:
         "This is my second post. I hope I love writing blogs as much as I love writing them.",
-        tags:["word","letters","writing"]
+      tags: ["word", "letters", "writing"],
     });
     await createPost({
       authorId: glamgal.id,
       title: "another Post",
       content: "I hope I love writing blogs as much as I love writing them.",
-      tags:["word","letters","writing"]
+      tags: ["word", "letters", "writing"],
     });
     console.log("Finished creating posts!");
   } catch (error) {

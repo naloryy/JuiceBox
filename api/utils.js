@@ -20,5 +20,5 @@ function requireActiveUser(req, res, next) {
 }
 module.exports = {
   requireUser,
-  requireActiveUser
+  requireActiveUser,
 };
