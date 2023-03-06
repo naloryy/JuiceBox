@@ -5,14 +5,12 @@ const { getAllPosts, createPost, updatePost, getPostById } = require("../db");
 
 postsRouter.use((req, res, next) => {
   console.log("A request is being made to /posts");
-
   next();
 });
 
 postsRouter.get("/", async (req, res, next) => {
   try {
     const allPosts = await getAllPosts();
-    console.log(allPosts);
     const posts = allPosts.filter((post) => {
       if (post.active || (req.user && post.author.id === req.user.id)) {
         if (post.author.active) {
@@ -36,11 +34,9 @@ postsRouter.post(
   requireActiveUser,
   async (req, res, next) => {
     const { title, content, tags = "" } = req.body;
-
     const tagArr = tags.trim().split(/\s+/);
     const postData = {};
 
-    // only send the tags if there are some to send
     if (tagArr.length) {
       postData.tags = tagArr;
     }
@@ -57,7 +53,6 @@ postsRouter.post(
         });
       }
       res.send({ post });
-      // otherwise, next an appropriate error object
     } catch ({ name, message }) {
       next({ name, message });
     }
@@ -71,21 +66,16 @@ postsRouter.patch(
   async (req, res, next) => {
     const { postId } = req.params;
     const { title, content, tags } = req.body;
-
     const updateFields = {};
-
     if (tags && tags.length > 0) {
       updateFields.tags = tags.trim().split(/\s+/);
     }
-
     if (title) {
       updateFields.title = title;
     }
-
     if (content) {
       updateFields.content = content;
     }
-
     try {
       const originalPost = await getPostById(postId);
 
