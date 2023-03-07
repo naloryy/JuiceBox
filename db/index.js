@@ -1,5 +1,9 @@
+const LOCAL_URL = "postgres://localhost:5432/juicebox-dev"
+const DATABASE_URL =
+  "postgres://juicebox_vy8e_user:MGVWvKN8T2x8uy3VFqo1EkqwilOl6FVz@dpg-cg3kr59mbg5fch5lui10-a.ohio-postgres.render.com/juicebox_vy8e?ssl=true";
 const { Client } = require("pg");
-const client = new Client("postgres://localhost:5432/juicebox-dev");
+const client = new Client(DATABASE_URL);
+
 
 //returns all users from database
 async function getAllUsers() {
