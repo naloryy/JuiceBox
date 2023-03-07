@@ -3,7 +3,7 @@ const LOCAL_URL = "postgres://localhost:5432/juicebox-dev"
 const { Client } = require("pg");
 const client = new Client(DATABASE_URL);
 
-
+//change
 //returns all users from database
 async function getAllUsers() {
   const { rows } = await client.query(
